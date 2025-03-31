@@ -162,13 +162,14 @@ public class ApiClient {
 
             // Construir el JSON
             String json = String.format(
-                    "{ \"nombre\": \"%s\", \"descripcion\": \"%s\", \"salario\": %.2f, \"imagen\": \"%s\", \"detalles\": \"%s\" }",
+                    "{ \"nombre\": \"%s\", \"descripcion\": \"%s\", \"salario\": " + vacante.getSalario() + ", \"imagen\": \"%s\", \"detalles\": \"%s\" }",
                     vacante.getNombre(),
                     vacante.getDescripcion(),
-                    vacante.getSalario(),
+
                     vacante.getImagen(),
                     vacante.getDetalles()
             );
+
             System.out.println("Enviando solicitud con el siguiente JSON:");
             System.out.println(json);
 

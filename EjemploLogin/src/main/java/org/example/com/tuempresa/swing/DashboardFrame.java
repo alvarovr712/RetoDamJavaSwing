@@ -138,12 +138,12 @@ public class DashboardFrame extends JFrame {
 
         if (resultado == JOptionPane.OK_OPTION) {
             try {
-                String salarioText = salarioField.getText().trim();
+                String salarioText = salarioField
+                        .getText()
+                        .trim()
+                        .replace(",", ".");
 
-                salarioText = salarioText.replace(',', '.');
-
-                DecimalFormat df = new DecimalFormat("#.##");
-                double salario = df.parse(salarioText).doubleValue();
+                double salario = Double.parseDouble(salarioText);
 
                 Vacante vacante = new Vacante();
 
@@ -152,6 +152,8 @@ public class DashboardFrame extends JFrame {
                 vacante.setSalario(salario);
                 vacante.setImagen(imagenField.getText());
                 vacante.setDetalles(detallesField.getText());
+
+                System.out.println(vacante.toString());
 
                 boolean exito = apiClient.crearVacante(vacante);
 
@@ -162,10 +164,6 @@ public class DashboardFrame extends JFrame {
                     JOptionPane.showMessageDialog(null, "Error al publicar la vacante");
                 }
             } catch (NumberFormatException e) {
-                throw new RuntimeException(e);
-            } catch (HeadlessException e) {
-                throw new RuntimeException(e);
-            } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
         }

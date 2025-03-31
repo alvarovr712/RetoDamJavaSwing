@@ -84,4 +84,11 @@ public class Vacante {
     public void setSolicitudes(List<Solicitud> solicitudes) {
         this.solicitudes = solicitudes;
     }
+
+    @Override
+    public String toString() {
+        return "Vacante{" +
+                "salario=" + salario +
+                '}';
+    }
 }

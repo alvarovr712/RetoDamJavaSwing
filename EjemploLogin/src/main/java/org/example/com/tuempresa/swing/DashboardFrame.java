@@ -6,6 +6,8 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.util.List;
 
 public class DashboardFrame extends JFrame {
@@ -26,6 +28,7 @@ public class DashboardFrame extends JFrame {
 
         //Crear los botones de nuestro menú lateral
         JButton botonPublicarVacante = new JButton("Publicar Vacante");
+        botonPublicarVacante.addActionListener(e -> publicarVacante());
         JButton botonEditarVacante = new JButton("Editar Vacante");
         JButton botonVerVacante = new JButton("Ver una Vacante");
         JButton botonVerTodasVacantes = new JButton("Ver todas las vacantes");
@@ -113,6 +116,59 @@ public class DashboardFrame extends JFrame {
 
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+
+    private void publicarVacante() {
+        JTextField nombreField = new JTextField();
+        JTextField descripcionField = new JTextField();
+        JTextField salarioField = new JTextField();
+        JTextField imagenField = new JTextField();
+        JTextField detallesField = new JTextField();
+
+
+        Object[] fields = {
+                "Nombre:", nombreField,
+                "Descripción:", descripcionField,
+                "Salario:", salarioField,
+                "Imagen (URL):", imagenField,
+                "Detalles:", detallesField
+        };
+
+        int resultado = JOptionPane.showConfirmDialog(null, fields, "Publicar Vacante", JOptionPane.OK_CANCEL_OPTION);
+
+        if (resultado == JOptionPane.OK_OPTION) {
+            try {
+                String salarioText = salarioField.getText().trim();
+
+                salarioText = salarioText.replace(',', '.');
+
+                DecimalFormat df = new DecimalFormat("#.##");
+                double salario = df.parse(salarioText).doubleValue();
+
+                Vacante vacante = new Vacante();
+
+                vacante.setNombre(nombreField.getText());
+                vacante.setDescripcion(descripcionField.getText());
+                vacante.setSalario(salario);
+                vacante.setImagen(imagenField.getText());
+                vacante.setDetalles(detallesField.getText());
+
+                boolean exito = apiClient.crearVacante(vacante);
+
+                if (exito) {
+                    JOptionPane.showMessageDialog(null, "Vacante creada con éxito");
+                    mostrarVacantes();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error al publicar la vacante");
+                }
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(e);
+            } catch (HeadlessException e) {
+                throw new RuntimeException(e);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
 

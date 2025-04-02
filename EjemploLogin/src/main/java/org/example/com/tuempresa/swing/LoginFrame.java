@@ -89,6 +89,8 @@ public class LoginFrame extends JFrame{
 
         }
 
+        // DONDE SE ELEJE QUE VENTA ABRIR USAR respuesta.equals("OK2") 
+
         private void autentificador(String username, String password){
             //Crear un ApiCliente para hacer solicitudes al login de una API
             ApiClient apiClient = new ApiClient();
@@ -100,6 +102,12 @@ public class LoginFrame extends JFrame{
                 LoginFrame.this.dispose();
 
                 new DashboardFrame();
+            }else if(respuesta.equals("OK2")){
+                JOptionPane.showMessageDialog(LoginFrame.this, "Inicio de sesión correcto");
+
+                LoginFrame.this.dispose();
+
+                new EmpresaFrame();
             }else {
                 JOptionPane.showMessageDialog(LoginFrame.this,"Usuario contraseña incorrecto");
             }

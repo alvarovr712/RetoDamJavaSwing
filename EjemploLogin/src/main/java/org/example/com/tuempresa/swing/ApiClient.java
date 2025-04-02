@@ -37,6 +37,8 @@ public class ApiClient {
         id_empresa = id;
     }
 
+    // LOGIN
+
     public String enviarRespuesta(String username, String password) {
         BufferedReader reader = null;
 
@@ -236,7 +238,6 @@ public class ApiClient {
                     "{ \"nombre\": \"%s\", \"descripcion\": \"%s\", \"salario\": " + vacante.getSalario() + ", \"imagen\": \"%s\", \"detalles\": \"%s\" }",
                     vacante.getNombre(),
                     vacante.getDescripcion(),
-
                     vacante.getImagen(),
                     vacante.getDetalles()
             );

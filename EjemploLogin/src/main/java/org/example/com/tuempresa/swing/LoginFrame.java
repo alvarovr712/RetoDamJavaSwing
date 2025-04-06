@@ -107,7 +107,7 @@ public class LoginFrame extends JFrame{
 
                 LoginFrame.this.dispose();
 
-                new EmpresaFrame();
+                new AdministradorFrame();
             }else {
                 JOptionPane.showMessageDialog(LoginFrame.this,"Usuario contraseña incorrecto");
             }

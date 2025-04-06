@@ -2,8 +2,7 @@ package org.example.com.tuempresa.swing;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.example.com.tuempresa.swing.model.Solicitud;
-import org.example.com.tuempresa.swing.model.Vacante;
+import org.example.com.tuempresa.swing.model.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import static java.lang.System.in;
 
@@ -432,9 +432,455 @@ public class ApiClient {
 
     }
 
+    public boolean altaEmpresa(Empresa empresa) {
+        try {
+            URL url = new URL("http://localhost:8080/empresa/nuevo");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
 
+            // Construir el JSON
+            Gson gson = new Gson();
+            String json = gson.toJson(empresa);
 
+            System.out.println("Enviando solicitud con el siguiente JSON:");
+            System.out.println(json);
 
+            try (OutputStream escribir = connection.getOutputStream()) {
+                byte[] mensaje = json.getBytes(StandardCharsets.UTF_8);
+                escribir.write(mensaje, 0, mensaje.length);
 
+                // Leer respuesta
+                int respuesta = connection.getResponseCode();
+
+                if (respuesta == HttpURLConnection.HTTP_OK || respuesta == HttpURLConnection.HTTP_CREATED) {
+                    return true;
+                } else {
+
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+                        StringBuilder errorResponse = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            errorResponse.append(inputLine);
+                        }
+                        System.err.println("Error al crear empresa: " + errorResponse.toString());
+                    }
+                    return false;
+                }
+
+            } catch (MalformedURLException e) {
+                System.err.println("Error en la URL: " + e.getMessage());
+                return false;
+            } catch (IOException e) {
+                System.err.println("Error de IO: " + e.getMessage());
+                return false;
+            }
+
+        } catch (ProtocolException e) {
+            System.err.println("Error de protocolo: " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            System.err.println("Error en la URL: " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            System.err.println("Error de IO: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<Empresa> obtenerEmpresas() {
+        List<Empresa> empresas = new ArrayList<>();
+
+        try {
+            URL url = new URL("http://localhost:8080/empresa");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json"); // Mejor usar Accept
+
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                throw new RuntimeException("Error HTTP: " + connection.getResponseCode());
+            }
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream()))) {
+
+                String jsonResponse = reader.lines().collect(Collectors.joining());
+                JSONArray jsonArray = new JSONArray(jsonResponse);
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonEmpresa = jsonArray.getJSONObject(i);
+                    Empresa empresa = new Empresa();
+
+                    // Manejo seguro de campos con posibles valores nulos o tipos incorrectos
+                    empresa.setId_empresa(jsonEmpresa.optInt("id_empresa", 0));
+                    empresa.setRazon_social(jsonEmpresa.optString("razon_social", ""));
+                    empresa.setPais(jsonEmpresa.optString("pais", ""));
+
+                    // Manejo especial para direccion_social
+                    Object direccion = jsonEmpresa.opt("direccion_social");
+                    if (direccion != null) {
+                        empresa.setDireccion_social(direccion.toString());
+                    } else {
+                        empresa.setDireccion_social("");
+                    }
+
+                    empresas.add(empresa);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo empresas: " + e.getMessage(), e);
+        }
+
+        return empresas;
+    }
+
+    public Empresa obtenerEmpresaPorId(int id) {
+        try {
+            URL url = new URL("http://localhost:8080/empresa/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            if (responseCode == HttpURLConnection.HTTP_NOT_FOUND) {
+                return null; // Empresa no encontrada
+            }
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new RuntimeException("Error HTTP: " + responseCode);
+            }
+
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream()))) {
+
+                String jsonResponse = reader.lines().collect(Collectors.joining());
+                JSONObject jsonEmpresa = new JSONObject(jsonResponse);
+
+                Empresa empresa = new Empresa();
+                empresa.setId_empresa(jsonEmpresa.optInt("id_empresa", 0));
+                empresa.setRazon_social(jsonEmpresa.optString("razon_social", ""));
+                empresa.setDireccion_social(jsonEmpresa.optString("direccion_social", ""));
+                empresa.setPais(jsonEmpresa.optString("pais", ""));
+
+                return empresa;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo empresa: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean actualizarEmpresa(int id, Empresa empresa) {
+        try {
+            URL url = new URL("http://localhost:8080/empresa/modificar/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            // Crear JSON con los datos actualizados
+            JSONObject jsonEmpresa = new JSONObject();
+            jsonEmpresa.put("id_empresa", empresa.getId_empresa());
+            jsonEmpresa.put("razon_social", empresa.getRazon_social());
+            jsonEmpresa.put("direccion_social", empresa.getDireccion_social());
+            jsonEmpresa.put("pais", empresa.getPais());
+
+            // Escribir el JSON en el cuerpo de la solicitud
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonEmpresa.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error actualizando empresa: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean borrarEmpresa(int id) {
+        try {
+            URL url = new URL("http://localhost:8080/empresa/retirar/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+            connection.setRequestProperty("Accept", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            // Considerar diferentes códigos de éxito según tu API
+            return responseCode == HttpURLConnection.HTTP_OK ||
+                    responseCode == HttpURLConnection.HTTP_NO_CONTENT;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando empresa: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean crearCategoria(Categoria categoria) {
+        try {
+            URL url = new URL("http://localhost:8080/categoria/nuevo");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            // Construir el JSON
+            Gson gson = new Gson();
+            String json = gson.toJson(categoria);
+
+            System.out.println("Enviando solicitud con el siguiente JSON:");
+            System.out.println(json);
+
+            try (OutputStream escribir = connection.getOutputStream()) {
+                byte[] mensaje = json.getBytes(StandardCharsets.UTF_8);
+                escribir.write(mensaje, 0, mensaje.length);
+
+                // Leer respuesta
+                int respuesta = connection.getResponseCode();
+
+                if (respuesta == HttpURLConnection.HTTP_OK || respuesta == HttpURLConnection.HTTP_CREATED) {
+                    return true;
+                } else {
+
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+                        StringBuilder errorResponse = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            errorResponse.append(inputLine);
+                        }
+                        System.err.println("Error al crear vacante: " + errorResponse.toString());
+                    }
+                    return false;
+                }
+
+            } catch (MalformedURLException e) {
+                System.err.println("Error en la URL: " + e.getMessage());
+                return false;
+            } catch (IOException e) {
+                System.err.println("Error de IO: " + e.getMessage());
+                return false;
+            }
+
+        } catch (ProtocolException e) {
+            System.err.println("Error de protocolo: " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            System.err.println("Error en la URL: " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            System.err.println("Error de IO: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public List<Categoria> obtenerCategorias() {
+        List<Categoria> categorias = new ArrayList<>();
+        try {
+            URL url = new URL("http://localhost:8080/categoria");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                JSONArray jsonArray = new JSONArray(reader.lines().collect(Collectors.joining()));
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonCat = jsonArray.getJSONObject(i);
+                    Categoria cat = new Categoria();
+                    cat.setId_categoria(jsonCat.getInt("id_categoria"));
+                    cat.setNombre(jsonCat.getString("nombre"));
+                    cat.setDescripcion(jsonCat.optString("descripcion", ""));
+                    categorias.add(cat);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo categorías: " + e.getMessage(), e);
+        }
+        return categorias;
+    }
+
+    public Categoria obtenerCategoriaPorId(int id) {
+        try {
+            URL url = new URL("http://localhost:8080/categoria/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                JSONObject jsonCat = new JSONObject(reader.lines().collect(Collectors.joining()));
+
+                Categoria cat = new Categoria();
+                cat.setId_categoria(jsonCat.getInt("id_categoria"));
+                cat.setNombre(jsonCat.getString("nombre"));
+                cat.setDescripcion(jsonCat.optString("descripcion", ""));
+                return cat;
+            }
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo categoría: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean actualizarCategoria(int id, Categoria categoria) {
+        try {
+            URL url = new URL("http://localhost:8080/categoria/modificar/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+            connection.setDoOutput(true);
+
+            // Crear JSON con los datos actualizados
+            JSONObject jsonCategoria = new JSONObject();
+            jsonCategoria.put("nombre", categoria.getNombre());
+            jsonCategoria.put("descripcion", categoria.getDescripcion());
+
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonCategoria.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error actualizando categoría: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean borrarCategoria(int id) {
+        try {
+            URL url = new URL("http://localhost:8080/categoria/retirar/" + id);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+            connection.setRequestProperty("Accept", "application/json");
+
+            int responseCode = connection.getResponseCode();
+
+            // Considerar diferentes códigos de éxito según tu API
+            return responseCode == HttpURLConnection.HTTP_OK ||
+                    responseCode == HttpURLConnection.HTTP_NO_CONTENT;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando categoría: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean desactivarUsuario(String username) {
+        try {
+            URL url = new URL("http://localhost:8080/usuario/desactivar/" + username);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Accept", "application/json");
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error desactivando usuario: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Usuario> obtenerUsuarios() {
+        List<Usuario> usuarios = new ArrayList<>();
+        try {
+            URL url = new URL("http://localhost:8080/usuario");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                JSONArray jsonArray = new JSONArray(reader.lines().collect(Collectors.joining()));
+
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonUser = jsonArray.getJSONObject(i);
+                    Usuario usuario = new Usuario();
+                    usuario.setUsername(jsonUser.getString("username"));
+                    usuario.setActivado(jsonUser.getBoolean("activado"));
+                    usuarios.add(usuario);
+                }
+            }
+            return usuarios;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error obteniendo usuarios: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean crearUsuario(Usuario usuario) {
+        try {
+            URL url = new URL("http://localhost:8080/usuario/nuevo");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setDoOutput(true);
+
+            // Construir el JSON
+            Gson gson = new Gson();
+            String json = gson.toJson(usuario);
+
+            System.out.println("Enviando solicitud con el siguiente JSON:");
+            System.out.println(json);
+
+            try (OutputStream escribir = connection.getOutputStream()) {
+                byte[] mensaje = json.getBytes(StandardCharsets.UTF_8);
+                escribir.write(mensaje, 0, mensaje.length);
+
+                // Leer respuesta
+                int respuesta = connection.getResponseCode();
+
+                if (respuesta == HttpURLConnection.HTTP_OK || respuesta == HttpURLConnection.HTTP_CREATED) {
+                    return true;
+                } else {
+
+                    try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getErrorStream()))) {
+                        StringBuilder errorResponse = new StringBuilder();
+                        String inputLine;
+                        while ((inputLine = in.readLine()) != null) {
+                            errorResponse.append(inputLine);
+                        }
+                        System.err.println("Error al crear usuario: " + errorResponse.toString());
+                    }
+                    return false;
+                }
+
+            } catch (MalformedURLException e) {
+                System.err.println("Error en la URL: " + e.getMessage());
+                return false;
+            } catch (IOException e) {
+                System.err.println("Error de IO: " + e.getMessage());
+                return false;
+            }
+
+        } catch (ProtocolException e) {
+            System.err.println("Error de protocolo: " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            System.err.println("Error en la URL: " + e.getMessage());
+            return false;
+        } catch (IOException e) {
+            System.err.println("Error de IO: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean asignarAdmin(String username) {
+        try {
+            URL url = new URL("http://localhost:8080/usuario/asignar/" + username);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("PUT");
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            return connection.getResponseCode() == HttpURLConnection.HTTP_OK;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error asignando admin: " + e.getMessage(), e);
+        }
+    }
 
 }

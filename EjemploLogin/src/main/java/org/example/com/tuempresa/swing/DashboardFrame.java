@@ -130,7 +130,7 @@ public class DashboardFrame extends JFrame {
         contentPanel.repaint();
     }
 
-    private void publicarVacante() {
+    private void publicarVacante(){
 
         contentPanel.removeAll();
 
@@ -506,6 +506,7 @@ public class DashboardFrame extends JFrame {
         }
 
     }
+
     private void mostrarFormulario() {
 
         contentPanel.removeAll();

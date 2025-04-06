@@ -821,8 +821,14 @@ public class ApiClient {
             connection.setDoOutput(true);
 
             // Construir el JSON
-            Gson gson = new Gson();
-            String json = gson.toJson(usuario);
+            String json = String.format(
+                    "{ \"username\": \"%s\", \"nombre\": \"%s\", \"apellidos\": \"%s\", \"email\": \"%s\", \"password\": \"%s\" }",
+                    usuario.getUsername(),
+                    usuario.getNombre(),
+                    usuario.getApellidos(),
+                    usuario.getEmail(),
+                    usuario.getPassword()
+            );
 
             System.out.println("Enviando solicitud con el siguiente JSON:");
             System.out.println(json);

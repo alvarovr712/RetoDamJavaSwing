@@ -812,9 +812,9 @@ public class ApiClient {
         }
     }
 
-    public boolean crearUsuario(Usuario usuario) {
+    public boolean crearUsuario(int id_perfil, Usuario usuario) {
         try {
-            URL url = new URL("http://localhost:8080/usuario/nuevo");
+            URL url = new URL("http://localhost:8080/usuario/registro/" + id_perfil);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
@@ -828,6 +828,7 @@ public class ApiClient {
                     usuario.getApellidos(),
                     usuario.getEmail(),
                     usuario.getPassword()
+
             );
 
             System.out.println("Enviando solicitud con el siguiente JSON:");

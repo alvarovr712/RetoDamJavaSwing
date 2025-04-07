@@ -11,6 +11,9 @@ public class Usuario {
     private boolean activado;
     private LocalDate fecha_registro;
 
+
+
+
     public String getUsername() {
         return username;
     }

@@ -1195,6 +1195,15 @@ public class AdministradorFrame extends JFrame{
             gbc.gridx = 1;
             formPanel.add(txtPassword, gbc);
 
+            //Campo id_perfil
+            JLabel lblPerfil = new JLabel("id_perfil");
+            JTextField txtPerfil = new JTextField(25);
+            gbc.gridx=0;
+            gbc.gridy =5;
+            formPanel.add(lblPerfil,gbc);
+            gbc.gridx=1;
+            formPanel.add(txtPerfil,gbc);
+
             // Panel de botones
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
             JButton btnGuardar = new JButton("Crear Usuario");
@@ -1204,7 +1213,7 @@ public class AdministradorFrame extends JFrame{
 
             // Posicionar botones
             gbc.gridx = 0;
-            gbc.gridy = 5;
+            gbc.gridy = 6;
             gbc.gridwidth = 2;
             gbc.anchor = GridBagConstraints.CENTER;
             formPanel.add(buttonPanel, gbc);
@@ -1225,7 +1234,8 @@ public class AdministradorFrame extends JFrame{
                             txtNombre.getText().isEmpty() ||
                             txtApellido.getText().isEmpty() ||
                             txtEmail.getText().isEmpty() ||
-                            txtPassword.getPassword().length == 0) {
+                            txtPassword.getPassword().length == 0 ||
+                            txtPerfil.getText().isEmpty()) {
 
                         JOptionPane.showMessageDialog(crudContentPanel,
                                 "Todos los campos son obligatorios",
@@ -1250,8 +1260,10 @@ public class AdministradorFrame extends JFrame{
                     nuevoUsuario.setEmail(txtEmail.getText().trim());
                     nuevoUsuario.setPassword(new String(txtPassword.getPassword()));
 
+                    int idPerfil = Integer.parseInt(txtPerfil.getText().trim());
+
                     // Llamar al API
-                    boolean exito = apiClient.crearUsuario(nuevoUsuario);
+                    boolean exito = apiClient.crearUsuario(idPerfil,nuevoUsuario);
 
                     if (exito) {
                         lblUsuarioCreado.setText("Usuario creado: " + nuevoUsuario.getUsername());

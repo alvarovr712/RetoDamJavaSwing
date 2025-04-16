@@ -131,8 +131,12 @@ public class ApiClient {
                     vacante.setSalario(jsonVacante.optDouble("salario", 0));
                     vacante.setEstatus(jsonVacante.getString("estatus"));
 
+                /*Al principio como el jsonignore estaba en el otro lado de la relación el endpoint tambien nos devolvia las solicitudes de cada vacante
+                  ahora al no recibirlas no necesitamos procesar un json para las solicitudes.
+                  */
+
                     //Procesar las solicitudes
-                    JSONArray solicitudesJson = jsonVacante.getJSONArray("solicitudes");
+                   /* JSONArray solicitudesJson = jsonVacante.getJSONArray("solicitudes");
                     List<Solicitud> solicitudes = new ArrayList<>();
                     for (int n = 0; n < solicitudesJson.length(); n++) {
                         JSONObject jsonSolicitud = solicitudesJson.getJSONObject(n);
@@ -144,7 +148,7 @@ public class ApiClient {
                         solicitud.setEstado((jsonSolicitud.getInt("estado")));
 
                         solicitudes.add(solicitud);
-                    }
+                    }*/
                     vacantes.add(vacante);
                 }
 

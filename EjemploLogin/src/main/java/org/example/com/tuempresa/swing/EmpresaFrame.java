@@ -4,18 +4,15 @@ import org.example.com.tuempresa.swing.model.Solicitud;
 import org.example.com.tuempresa.swing.model.Vacante;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class DashboardFrame extends JFrame {
+public class EmpresaFrame extends JFrame {
     private ApiClient apiClient;
     private JPanel contentPanel;
-    public DashboardFrame() {
+    public EmpresaFrame() {
         setTitle("Empresa");
         setSize(1600, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

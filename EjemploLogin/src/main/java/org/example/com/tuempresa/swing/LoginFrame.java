@@ -101,7 +101,7 @@ public class LoginFrame extends JFrame{
 
                 LoginFrame.this.dispose();
 
-                new DashboardFrame();
+                new EmpresaFrame();
             }else if(respuesta.equals("OK2")){
                 JOptionPane.showMessageDialog(LoginFrame.this, "Inicio de sesión correcto");
 

@@ -552,7 +552,6 @@ public class AdministradorFrame extends JFrame{
         contentPanel.repaint();
     }
 
-
     // DESDE AQUI SE MANEJA EL CRUD DE GESTION DE CATEGORIAS
     private void mostrarGestionCategorias() {
         // Limpiar el contenido actual

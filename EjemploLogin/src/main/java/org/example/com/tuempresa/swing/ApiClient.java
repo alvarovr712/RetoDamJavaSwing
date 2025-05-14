@@ -131,24 +131,6 @@ public class ApiClient {
                     vacante.setSalario(jsonVacante.optDouble("salario", 0));
                     vacante.setEstatus(jsonVacante.getString("estatus"));
 
-                /*Al principio como el jsonignore estaba en el otro lado de la relación el endpoint tambien nos devolvia las solicitudes de cada vacante
-                  ahora al no recibirlas no necesitamos procesar un json para las solicitudes.
-                  */
-
-                    //Procesar las solicitudes
-                   /* JSONArray solicitudesJson = jsonVacante.getJSONArray("solicitudes");
-                    List<Solicitud> solicitudes = new ArrayList<>();
-                    for (int n = 0; n < solicitudesJson.length(); n++) {
-                        JSONObject jsonSolicitud = solicitudesJson.getJSONObject(n);
-                        Solicitud solicitud = new Solicitud();
-
-                        solicitud.setIdSolicitud(jsonSolicitud.getInt("id_solicitud"));
-                        solicitud.setArchivo(jsonSolicitud.optString("archivo", "No disponible"));
-                        solicitud.setComentario(jsonSolicitud.optString("comentario", "No disponible"));
-                        solicitud.setEstado((jsonSolicitud.getInt("estado")));
-
-                        solicitudes.add(solicitud);
-                    }*/
                     vacantes.add(vacante);
                 }
 
@@ -174,7 +156,8 @@ public class ApiClient {
 
             // Construir el JSON
             String json = String.format(
-                    "{ \"nombre\": \"%s\", \"descripcion\": \"%s\", \"salario\": " + vacante.getSalario() + ", \"imagen\": \"%s\", \"detalles\": \"%s\" }",
+                    "{ \"nombre\": \"%s\", \"descripcion\": \"%s\", \"salario\": " +
+                            vacante.getSalario() + ", \"imagen\": \"%s\", \"detalles\": \"%s\" }",
                     vacante.getNombre(),
                     vacante.getDescripcion(),
 

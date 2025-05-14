@@ -13,7 +13,7 @@ public class LoginFrame extends JFrame{
     public LoginFrame(){
         setTitle("Login");
         setSize(400,200);
-        //La aplicacion se parara al cerrar la ventana
+        //La aplicación se para al cerrar la ventana
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         /*Centra la ventana en la pantalla, si quieres que se centre en otra ventana por ejemplo JFrame en vez de null pasarias el valor al que
           quieres que se centre.
@@ -89,7 +89,7 @@ public class LoginFrame extends JFrame{
 
         }
 
-        // DONDE SE ELEJE QUE VENTA ABRIR USAR respuesta.equals("OK2") 
+        // DONDE SE ELIJE QUÉ VENTA ABRIR USAR respuesta.equals("OK2")
 
         private void autentificador(String username, String password){
             //Crear un ApiCliente para hacer solicitudes al login de una API
